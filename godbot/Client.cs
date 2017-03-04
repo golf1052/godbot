@@ -138,6 +138,17 @@ namespace godbot
             {
                 await SendSlackMessage("My name is godbot.", channel);
             }
+            else if (text.ToLower() == "godbot progress")
+            {
+                if (currentGame != null)
+                {
+                    await SendSlackMessage("Game in progress.", channel);
+                }
+                else
+                {
+                    await SendSlackMessage("No game in progress.", channel);
+                }
+            }
             else if (text.ToLower() == "godbot stop game")
             {
                 if (currentGame != null)
