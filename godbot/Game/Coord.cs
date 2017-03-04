@@ -39,7 +39,7 @@ namespace godbot.Game
 
         public override string ToString()
         {
-            return $"[{X}, {Y}]";
+            return $"{X}{Y}";
         }
 
         public static bool operator ==(Coord a, Coord b)

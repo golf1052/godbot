@@ -7,12 +7,20 @@ namespace godbot.Game
 {
     public class Game
     {
+        public enum YearHalfs
+        {
+            First,
+            Second
+        }
+
         public Board board;
         private Random random;
         private List<Settlement> settlements;
-        private Team redTeam;
-        private Team blueTeam;
+        public Team RedTeam { get; private set; }
+        public Team BlueTeam { get; private set; }
+        private YearHalfs yearHalf;
         public int Year { get; private set; }
+        public bool ResolveSwap { get; set; }
         private int SwapYear { get; set; }
         public Constants.Teams TeamTurn { get; set; }
         private Team CurrentPlayingTeam
@@ -21,11 +29,11 @@ namespace godbot.Game
             {
                 if (TeamTurn == Constants.Teams.Red)
                 {
-                    return redTeam;
+                    return RedTeam;
                 }
                 else if (TeamTurn == Constants.Teams.Blue)
                 {
-                    return blueTeam;
+                    return BlueTeam;
                 }
                 else
                 {
@@ -40,9 +48,11 @@ namespace godbot.Game
             board = new Board();
             random = new Random();
             settlements = new List<Settlement>();
-            redTeam = new Team(redTeamUserId, Constants.Teams.Red);
-            blueTeam = new Team(blueTeamUserId, Constants.Teams.Blue);
+            RedTeam = new Team(redTeamUserId, Constants.Teams.Red);
+            BlueTeam = new Team(blueTeamUserId, Constants.Teams.Blue);
+            yearHalf = YearHalfs.First;
             Year = 0;
+            ResolveSwap = false;
             SwapYear = 0;
             KillPopulation = false;
         }
@@ -62,12 +72,12 @@ namespace godbot.Game
             Advance();
         }
 
-        private void Advance()
+        public void Advance()
         {
             if (KillPopulation)
             {
-                redTeam.Population = 0;
-                blueTeam.Population = 0;
+                RedTeam.Population = 0;
+                BlueTeam.Population = 0;
             }
 
             foreach (Settlement settlement in settlements)
@@ -77,38 +87,38 @@ namespace godbot.Game
                 {
                     if (KillPopulation)
                     {
-                        redTeam.Population += settlement.TeamPopulation;
-                        blueTeam.Population += settlement.EnemyPopulation;
+                        RedTeam.Population += settlement.TeamPopulation;
+                        BlueTeam.Population += settlement.EnemyPopulation;
                     }
                     else
                     {
-                        redTeam.Population += settlement.TeamPopulationPerTurn;
-                        blueTeam.Population += settlement.EnemyPopulationPerTurn;
+                        RedTeam.Population += settlement.TeamPopulationPerTurn;
+                        BlueTeam.Population += settlement.EnemyPopulationPerTurn;
                     }
                 }
                 else if (settlement.OwningTeam == Constants.Teams.Blue)
                 {
                     if (KillPopulation)
                     {
-                        blueTeam.Population += settlement.TeamPopulation;
-                        redTeam.Population += settlement.EnemyPopulation;
+                        BlueTeam.Population += settlement.TeamPopulation;
+                        RedTeam.Population += settlement.EnemyPopulation;
                     }
                     else
                     {
-                        blueTeam.Population += settlement.TeamPopulationPerTurn;
-                        redTeam.Population += settlement.EnemyPopulationPerTurn;
+                        BlueTeam.Population += settlement.TeamPopulationPerTurn;
+                        RedTeam.Population += settlement.EnemyPopulationPerTurn;
                     }
                 }
             }
             Year++;
             if (Year >= SwapYear)
             {
-                // initiate swap
+                ResolveSwap = true;
                 GetNewSwapYear();
             }
         }
 
-        public List<string> AttemptPlaySettlements(params string[] coords)
+        public List<string> AttemptPlaySettlements(List<string> coords)
         {
             List<string> failed = new List<string>();
             foreach (string stringCoord in coords)
@@ -129,7 +139,7 @@ namespace godbot.Game
             return failed;
         }
 
-        public List<Settlement> PlayMissiles(params string[] coords)
+        public List<Settlement> PlayMissiles(List<string> coords)
         {
             List<Settlement> settlementsDestroyed = new List<Settlement>();
             List<Tile> allAffectedTiles = new List<Tile>();
@@ -156,7 +166,7 @@ namespace godbot.Game
             }
         }
 
-        public List<Tile> AddToAffectedTiles(List<Tile> newTiles, List<Tile> affectedTiles)
+        private List<Tile> AddToAffectedTiles(List<Tile> newTiles, List<Tile> affectedTiles)
         {
             foreach (Tile tile in newTiles)
             {
@@ -197,6 +207,40 @@ namespace godbot.Game
         {
             SwapYear = random.Next(15, 21) + Year;
             KillPopulation = true;
+        }
+
+        public string GetTeamPopulationTotalString(Constants.Teams team)
+        {
+            if (!KillPopulation)
+            {
+                if (team == Constants.Teams.Red)
+                {
+                    return $"{RedTeam.Population / Constants.PopulationMultiplier} points";
+                }
+                else if (team == Constants.Teams.Blue)
+                {
+                    return $"{BlueTeam.Population / Constants.PopulationMultiplier} points";
+                }
+                else
+                {
+                    return "ERROR points";
+                }
+            }
+            else
+            {
+                if (team == Constants.Teams.Red)
+                {
+                    return $"{RedTeam.Population} people";
+                }
+                else if (team == Constants.Teams.Blue)
+                {
+                    return $"{BlueTeam.Population} people";
+                }
+                else
+                {
+                    return "ERROR people";
+                }
+            }
         }
     }
 }

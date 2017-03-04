@@ -15,6 +15,7 @@ using golf1052.SlackAPI;
 using golf1052.SlackAPI.Events;
 using golf1052.SlackAPI.Objects;
 using golf1052.SlackAPI.Other;
+using godbot.Game;
 
 namespace godbot
 {
@@ -22,6 +23,8 @@ namespace godbot
     {
         public const string BaseUrl = "https://slack.com/api/";
         public const string ChannelId = "G4DK350RK";
+        public const string golf1052UserId = "U03FNCQL3";
+        public const string golf1052Dm = "D0L4V7E68";
 
         static Client()
         {
@@ -34,7 +37,9 @@ namespace godbot
 
         event EventHandler<SlackMessageEventArgs> MessageReceived;
 
+        SlackGameManager currentGame;
         bool outputToChannel;
+        bool debug;
 
         public Client(string accessToken)
         {
@@ -43,7 +48,8 @@ namespace godbot
             slackCore = new SlackCore(accessToken);
             slackUsers = new List<SlackUser>();
             slackChannels = new List<SlackChannel>();
-            outputToChannel = false;
+            outputToChannel = true;
+            debug = true;
         }
 
         public async Task Connect(Uri uri)
@@ -96,6 +102,29 @@ namespace godbot
             {
                 // subtype or message changed
             }
+            if (debug && channel == ChannelId)
+            {
+                if (text.ToLower() == "godbot start game")
+                {
+                    if (currentGame == null)
+                    {
+                        string user = (string)e.Message["user"];
+                        if (user == golf1052UserId)
+                        {
+                            currentGame = new SlackGameManager(user, golf1052Dm, user, golf1052Dm, debug, ChannelId);
+                            await SendSlackMessage("Do you have a die that you can roll? (Answer yes or no)", channel);
+                        }
+                        else
+                        {
+                            await SendSlackMessage("Only Sanders can start games right now.", channel);
+                        }
+                    }
+                    else
+                    {
+                        await SendSlackMessage("Cannot start game. Game already in progress.", channel);
+                    }
+                }
+            }
             if (text.ToLower() == "godbot ping")
             {
                 await SendSlackMessage("pong", channel);
@@ -108,6 +137,40 @@ namespace godbot
             {
                 await SendSlackMessage("My name is godbot.", channel);
             }
+            if (currentGame != null)
+            {
+                if (currentGame.WaitingForDieResponse)
+                {
+                    if (text.ToLower() == "yes")
+                    {
+                        currentGame.WaitingForDieResponse = false;
+                        currentGame.PlayersHaveDie = true;
+                    }
+                    else if (text.ToLower() == "no")
+                    {
+                        currentGame.WaitingForDieResponse = false;
+                        currentGame.PlayersHaveDie = false;
+                    }
+                    await SendGameInstructions(currentGame.StartYear());
+                }
+                else if (currentGame.WaitingForDieRollResponse)
+                {
+                    await SendGameInstructions(currentGame.ProcessDieRoll(text));
+                }
+                else if (currentGame.WaitingForRoundResponse)
+                {
+                    var i = currentGame.ContinueRound(text.ToUpper());
+                    if (!currentGame.GameIsOver)
+                    {
+                        await SendGameInstructions(i);
+                    }
+                    
+                    if (currentGame.GameIsOver)
+                    {
+                        currentGame = null;
+                    }
+                }
+            }
         }
 
         public T GetRandomFromList<T>(List<T> list)
@@ -116,7 +179,16 @@ namespace godbot
             return list[random.Next(list.Count)];
         }
 
-                public async Task SendSlackMessage(List<string> lines, string channel)
+        public async Task SendGameInstructions(List<GameInstruction> instructions)
+        {
+            foreach (var i in instructions)
+            {
+                await SendSlackMessage(i.Text, i.Channel);
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
+            }
+        }
+
+        public async Task SendSlackMessage(List<string> lines, string channel)
         {
             string message = string.Empty;
             for (int i = 0; i < lines.Count; i++)
