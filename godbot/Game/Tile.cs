@@ -7,27 +7,25 @@ namespace godbot.Game
 {
     public struct Tile
     {
-        public string X { get; private set; }
-        public int Y { get; private set; }
-        public Constants.Sides Side { get; set; }
-        public bool CanPlaceOn
+        public Coord Coord { get; private set; }
+        public Settlement Settlement { get; set; }
+        public bool HasSettlement
         {
             get
             {
-                return Side == Constants.Sides.None;
+                return Settlement == null;
             }
         }
 
-        public Tile(string x, int y)
+        public Tile(Coord coord)
         {
-            X = x;
-            Y = y;
-            Side = Constants.Sides.None;
+            Coord = coord;
+            Settlement = null;
         }
 
         public override string ToString()
         {
-            return $"[{X}, {Y}]";
+            return Coord.ToString();
         }
     }
 }
