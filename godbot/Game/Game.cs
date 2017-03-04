@@ -118,6 +118,7 @@ namespace godbot.Game
                 if (!tile.HasSettlement)
                 {
                     Settlement settlement = new Settlement(CurrentPlayingTeam.TeamColor, tile);
+                    tile.Settlement = settlement;
                     settlements.Add(settlement);
                 }
                 else
@@ -143,6 +144,16 @@ namespace godbot.Game
                 settlementsDestroyed.Add(tile.Settlement);
             }
             return settlementsDestroyed;
+        }
+
+        public void RemoveDestroyedSettlements(List<Settlement> destroyedSettlements)
+        {
+            foreach (Settlement settlement in destroyedSettlements)
+            {
+                Tile tile = settlement.Tile;
+                tile.Settlement = null;
+                settlements.Remove(settlement);
+            }
         }
 
         public List<Tile> AddToAffectedTiles(List<Tile> newTiles, List<Tile> affectedTiles)
