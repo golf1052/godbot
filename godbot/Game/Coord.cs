@@ -15,13 +15,6 @@ namespace godbot.Game
                 return X[0] - 65;
             }
         }
-        public int XAsIndex
-        {
-            get
-            {
-                return XAsNumber - 1;
-            }
-        }
         public int Y { get; private set; }
         public int YAsIndex
         {

@@ -123,6 +123,7 @@ namespace godbot
                     {
                         await SendSlackMessage("Cannot start game. Game already in progress.", channel);
                     }
+                    return;
                 }
             }
             if (text.ToLower() == "godbot ping")
@@ -137,7 +138,15 @@ namespace godbot
             {
                 await SendSlackMessage("My name is godbot.", channel);
             }
-            if (currentGame != null)
+            else if (text.ToLower() == "godbot stop game")
+            {
+                if (currentGame != null)
+                {
+                    currentGame = null;
+                    await SendSlackMessage("Ended game", channel);
+                }
+            }
+            else if (currentGame != null)
             {
                 if (currentGame.WaitingForDieResponse)
                 {

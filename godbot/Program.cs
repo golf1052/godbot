@@ -9,10 +9,10 @@ namespace godbot
     {
         public static void Main(string[] args)
         {
-            Board board = new Board();
-            Debug.WriteLine(board.GetTile("A", 1));
-            Debug.WriteLine(board.GetTile("L", 12));
-            Debug.WriteLine(board.GetTile("E", 7));
+            //Game.Game game = new Game.Game("", "");
+            //game.TeamTurn = Constants.Teams.Red;
+            //var settlements = game.AttemptPlaySettlements("A1", "A1", "C3");
+            //var hitSettlements = game.PlayMissiles("E6", "A1", "A1");
 
             var host = new WebHostBuilder()
                 .UseKestrel()

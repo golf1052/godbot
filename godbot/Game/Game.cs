@@ -54,23 +54,24 @@ namespace godbot.Game
             Year = 0;
             ResolveSwap = false;
             SwapYear = 0;
+            GetNewSwapYear();
             KillPopulation = false;
         }
 
-        public void RunYear()
-        {
-            // roll die
-            int die = RollDie();
-            // CurrentPlayingTeam moves = die
-            // Player inputs settlement moves
-            // Player inputs missile moves
-            SwitchTeamTurn();
-            // CurrentPlayingTeam moves = 6 - die
-            // Player inputs settlement moves
-            // Player inputs missile moves
-            // Advance game
-            Advance();
-        }
+        //public void RunYear()
+        //{
+        //    // roll die
+        //    int die = RollDie();
+        //    // CurrentPlayingTeam moves = die
+        //    // Player inputs settlement moves
+        //    // Player inputs missile moves
+        //    SwitchTeamTurn();
+        //    // CurrentPlayingTeam moves = 6 - die
+        //    // Player inputs settlement moves
+        //    // Player inputs missile moves
+        //    // Advance game
+        //    Advance();
+        //}
 
         public void Advance()
         {
@@ -118,6 +119,11 @@ namespace godbot.Game
             }
         }
 
+        public List<string> AttemptPlaySettlements(params string[] coords)
+        {
+            return AttemptPlaySettlements(new List<string>(coords));
+        }
+
         public List<string> AttemptPlaySettlements(List<string> coords)
         {
             List<string> failed = new List<string>();
@@ -139,6 +145,11 @@ namespace godbot.Game
             return failed;
         }
 
+        public List<Settlement> PlayMissiles(params string[] coords)
+        {
+            return PlayMissiles(new List<string>(coords));
+        }
+
         public List<Settlement> PlayMissiles(List<string> coords)
         {
             List<Settlement> settlementsDestroyed = new List<Settlement>();
@@ -151,7 +162,10 @@ namespace godbot.Game
             }
             foreach (Tile tile in allAffectedTiles)
             {
-                settlementsDestroyed.Add(tile.Settlement);
+                if (tile.HasSettlement)
+                {
+                    settlementsDestroyed.Add(tile.Settlement);
+                }
             }
             return settlementsDestroyed;
         }

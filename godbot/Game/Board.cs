@@ -46,15 +46,16 @@ namespace godbot.Game
         /// <param name="x">x coord, 0 index</param>
         /// <param name="y">y coord, 0 index</param>
         /// <returns>null if coord does not exist, a tile if coord exists</returns>
-        public Tile? TryGetTile(int x, int y)
+        public Tile TryGetTile(int x, int y)
         {
-            if (x < 0 || y < 0)
+            if (x < 0 || x > 11 ||
+                y < 0 || y > 11)
             {
                 return null;
             }
             else
             {
-                return board[x + 1, y + 1];
+                return board[x, y];
             }
         }
 
@@ -65,15 +66,15 @@ namespace godbot.Game
                 throw new Exception($"{nameof(size)} must be an odd number");
             }
             List<Tile> tiles = new List<Tile>();
-            int startingCornerNumber = size - size / 2;
-            for (int i = center.XAsIndex - startingCornerNumber; i < size; i++)
+            int cornerNumber = size - (int)Math.Ceiling((double)size / 2);
+            for (int i = center.XAsNumber - cornerNumber; i <= center.XAsNumber + cornerNumber; i++)
             {
-                for (int j = center.YAsIndex - startingCornerNumber; j < size; j++)
+                for (int j = center.YAsIndex - cornerNumber; j <= center.YAsIndex + cornerNumber; j++)
                 {
-                    Tile? tile = TryGetTile(i, j);
+                    Tile tile = TryGetTile(i, j);
                     if (tile != null)
                     {
-                        tiles.Add(tile.Value);
+                        tiles.Add(tile);
                     }
                 }
             }

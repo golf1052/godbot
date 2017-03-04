@@ -93,6 +93,7 @@ namespace godbot
         public bool PlayersHaveDie { get; set; }
         public bool WaitingForDieRollResponse { get; set; }
         private int currentDieRoll;
+        private int currentPlayersMoves;
 
         public bool WaitingForRoundResponse { get; set; }
         public bool GameIsOver { get; private set; }
@@ -107,9 +108,13 @@ namespace godbot
             WaitingForDieResponse = true;
             PlayersHaveDie = false;
             currentDieRoll = 0;
+            currentPlayersMoves = 0;
+            WaitingForDieRollResponse = false;
+            WaitingForRoundResponse = false;
             partOfRound = HalfOfRound.FirstHalf;
             sectionOfRound = SectionOfRound.Settlements;
             GameIsOver = false;
+            game.TeamTurn = Constants.Teams.Red;
         }
 
         public List<GameInstruction> StartYear()
@@ -148,6 +153,7 @@ namespace godbot
                 WaitingForDieRollResponse = false;
                 WaitingForRoundResponse = true;
                 currentDieRoll = number;
+                currentPlayersMoves = currentDieRoll;
                 var i = new GameInstruction($"{CurrentPlayerName} rolls a {currentDieRoll}. They can take {currentDieRoll} resources.", OutputChannel);
                 instructions.Add(i);
             }
@@ -190,12 +196,19 @@ namespace godbot
                         moves.Add(coord);
                     }
                 }
+                if (moves.Count > currentPlayersMoves)
+                {
+                    var i = new GameInstruction("Entered too many moves. Please enter your settlement coordinates again.", OutputChannel);
+                    instructions.Add(i);
+                    return instructions;
+                }
                 foreach (var move in moves)
                 {
                     if (!Constants.ValidCoord(move))
                     {
                         var i = new GameInstruction("Invalid move. Please enter your settlement coordinates again.", OutputChannel);
                         instructions.Add(i);
+                        return instructions;
                     }
                 }
                 List<string> failedMoves = game.AttemptPlaySettlements(moves);
@@ -231,12 +244,19 @@ namespace godbot
                         moves.Add(coord);
                     }
                 }
+                if (moves.Count > currentPlayersMoves)
+                {
+                    var i = new GameInstruction("Entered too many moves. Please enter your settlement coordinates again.", OutputChannel);
+                    instructions.Add(i);
+                    return instructions;
+                }
                 foreach (var move in moves)
                 {
                     if (!Constants.ValidCoord(move))
                     {
                         var i = new GameInstruction("Invalid move. Please enter your missile coordinates again.", OutputChannel);
                         instructions.Add(i);
+                        return instructions;
                     }
                 }
                 List<Settlement> destroyedSettlements = game.PlayMissiles(moves);
@@ -272,6 +292,7 @@ namespace godbot
                 var switchI = new GameInstruction($"Switching turns...", OutputChannel);
                 instructions.Add(switchI);
                 game.SwitchTeamTurn();
+                currentPlayersMoves = 6 - currentDieRoll;
                 if (currentDieRoll != 6)
                 {
                     var i = new GameInstruction($"{CurrentPlayerName} can take {6 - currentDieRoll} resources.", OutputChannel);

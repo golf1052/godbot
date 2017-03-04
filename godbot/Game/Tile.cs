@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace godbot.Game
 {
-    public struct Tile
+    public class Tile
     {
         public Coord Coord { get; private set; }
         public Settlement Settlement { get; set; }
@@ -13,7 +13,7 @@ namespace godbot.Game
         {
             get
             {
-                return Settlement == null;
+                return Settlement != null;
             }
         }
 

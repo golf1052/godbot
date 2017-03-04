@@ -24,7 +24,9 @@ namespace godbot.Game
 
         public static Coord StringToCoord(string str)
         {
-            return new Coord(str[0].ToString(), int.Parse(str[1].ToString()));
+            string x = str[0].ToString();
+            int y = int.Parse(str.Substring(1));
+            return new Coord(x, y);
         }
 
         public static bool ValidCoord(string str)
