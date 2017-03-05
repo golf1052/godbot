@@ -13,6 +13,8 @@ namespace godbot
             //game.TeamTurn = Constants.Teams.Red;
             //var settlements = game.AttemptPlaySettlements("A1", "A1", "C3");
             //var hitSettlements = game.PlayMissiles("E6", "A1", "A1");
+            //Tests tests = new Tests();
+            //tests.Run();
 
             var host = new WebHostBuilder()
                 .UseKestrel()

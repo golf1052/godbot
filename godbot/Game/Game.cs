@@ -7,18 +7,11 @@ namespace godbot.Game
 {
     public class Game
     {
-        public enum YearHalfs
-        {
-            First,
-            Second
-        }
-
         public Board board;
         private Random random;
         private List<Settlement> settlements;
         public Team RedTeam { get; private set; }
         public Team BlueTeam { get; private set; }
-        private YearHalfs yearHalf;
         public int Year { get; private set; }
         public bool ResolveSwap { get; set; }
         private int SwapYear { get; set; }
@@ -41,7 +34,7 @@ namespace godbot.Game
                 }
             }
         }
-        public bool KillPopulation { get; private set; }
+        public bool KillPopulation { get; set; }
 
         public Game(string redTeamUserId, string blueTeamUserId)
         {
@@ -50,11 +43,11 @@ namespace godbot.Game
             settlements = new List<Settlement>();
             RedTeam = new Team(redTeamUserId, Constants.Teams.Red);
             BlueTeam = new Team(blueTeamUserId, Constants.Teams.Blue);
-            yearHalf = YearHalfs.First;
             Year = 0;
             ResolveSwap = false;
             SwapYear = 0;
             GetNewSwapYear();
+            Year = 1;
             KillPopulation = false;
         }
 
