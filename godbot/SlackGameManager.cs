@@ -152,6 +152,8 @@ namespace godbot
             {
                 WaitingForDieRollResponse = false;
                 WaitingForRoundResponse = true;
+                var yearI = new GameInstruction($"It is year {game.Year}.", OutputChannel);
+                instructions.Add(yearI);
                 currentDieRoll = number;
                 currentPlayersMoves = currentDieRoll;
                 var i = new GameInstruction($"{CurrentPlayerName} rolls a {currentDieRoll}. They can take {currentDieRoll} resources.", OutputChannel);
