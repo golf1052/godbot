@@ -18,6 +18,7 @@ namespace godbot
 
             var host = new WebHostBuilder()
                 .UseKestrel()
+                .UseUrls("http://127.0.0.1:8893")
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
