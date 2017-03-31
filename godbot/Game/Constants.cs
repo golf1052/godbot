@@ -7,6 +7,7 @@ namespace godbot.Game
 {
     public static class Constants
     {
+        public const int BoardSize = 8;
         public const int FriendlyTerritoryPopulationPerTurn = 1000;
         public const int FriendlyTerritoryEnemyPopulationPerTurn = 0;
         public const int EnemyTerritoryPopulationPerTurn = 3000;
@@ -37,7 +38,7 @@ namespace godbot.Game
             }
             char lettter = str[0];
             string numberPortion = str.Substring(1);
-            if (lettter < 65 || lettter > 76)
+            if (lettter < 65 || lettter > 65 + BoardSize - 1)
             {
                 return false;
             }
@@ -47,7 +48,7 @@ namespace godbot.Game
             {
                 return false;
             }
-            if (number < 1 || number > 12)
+            if (number < 1 || number > BoardSize)
             {
                 return false;
             }

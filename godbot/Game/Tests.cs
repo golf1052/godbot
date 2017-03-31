@@ -12,6 +12,7 @@ namespace godbot.Game
         {
         }
 
+        // Tests for board size 12
         public void Run()
         {
             Coord stc1 = Constants.StringToCoord("A1");

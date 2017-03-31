@@ -7,19 +7,17 @@ namespace godbot.Game
 {
     public class Board
     {
-        public const int BoardSize = 12;
-
-        // X is letters A - L
-        // Y is numbers 1 - 12
+        // X is letters A - H
+        // Y is numbers 1 - 8
         public Tile[,] board;
 
         public Board()
         {
-            board = new Tile[BoardSize, BoardSize];
-            for (int i = 0; i < BoardSize; i++)
+            board = new Tile[Constants.BoardSize, Constants.BoardSize];
+            for (int i = 0; i < Constants.BoardSize; i++)
             {
                 int currentLetter = 65 + i;
-                for (int j = 0; j < BoardSize; j++)
+                for (int j = 0; j < Constants.BoardSize; j++)
                 {
                     board[i, j] = new Tile(new Coord(((char)currentLetter).ToString(), j + 1));
                 }
@@ -48,8 +46,8 @@ namespace godbot.Game
         /// <returns>null if coord does not exist, a tile if coord exists</returns>
         public Tile TryGetTile(int x, int y)
         {
-            if (x < 0 || x > 11 ||
-                y < 0 || y > 11)
+            if (x < 0 || x > Constants.BoardSize - 1 ||
+                y < 0 || y > Constants.BoardSize - 1)
             {
                 return null;
             }

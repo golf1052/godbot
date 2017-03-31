@@ -15,11 +15,11 @@ namespace godbot.Game
             {
                 if (OwningTeam == Constants.Teams.Red)
                 {
-                    return Tile.Coord.Y > 6;
+                    return Tile.Coord.Y > Constants.BoardSize / 2;
                 }
                 else if (OwningTeam == Constants.Teams.Blue)
                 {
-                    return Tile.Coord.Y < 7;
+                    return Tile.Coord.Y < Constants.BoardSize / 2 + 1;
                 }
                 else
                 {

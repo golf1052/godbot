@@ -212,7 +212,7 @@ namespace godbot.Game
 
         public void GetNewSwapYear()
         {
-            SwapYear = random.Next(15, 21) + Year;
+            SwapYear = random.Next(10, 16) + Year;
             KillPopulation = true;
         }
 
