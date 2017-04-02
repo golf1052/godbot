@@ -203,7 +203,7 @@ namespace godbot
         {
             foreach (var i in instructions)
             {
-                await SendSlackMessage(i.Text, i.Channel);
+                await SendSlackMessage(i.Text, i.Recipient);
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
         }
