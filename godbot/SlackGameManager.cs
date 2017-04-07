@@ -37,7 +37,33 @@ namespace godbot
                 }
             }
         }
-        
+
+        protected override string OtherChannel
+        {
+            get
+            {
+                if (debug)
+                {
+                    return debugChannel;
+                }
+                else
+                {
+                    if (game.TeamTurn == Constants.Teams.Red)
+                    {
+                        return BluePlayerDm;
+                    }
+                    else if (game.TeamTurn == Constants.Teams.Blue)
+                    {
+                        return RedPlayerDm;
+                    }
+                    else
+                    {
+                        return debugChannel;
+                    }
+                }
+            }
+        }
+
         protected override string CurrentPlayerName
         {
             get
@@ -85,7 +111,6 @@ namespace godbot
             WaitingForDieResponse = true;
             PlayersHaveDie = false;
             currentDieRoll = 0;
-            currentPlayersMoves = 0;
             WaitingForDieRollResponse = false;
             WaitingForRoundResponse = false;
             partOfRound = HalfOfRound.FirstHalf;

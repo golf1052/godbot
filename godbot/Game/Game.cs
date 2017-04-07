@@ -16,7 +16,7 @@ namespace godbot.Game
         public bool ResolveSwap { get; set; }
         private int SwapYear { get; set; }
         public Constants.Teams TeamTurn { get; set; }
-        private Team CurrentPlayingTeam
+        public Team CurrentPlayingTeam
         {
             get
             {
@@ -51,23 +51,11 @@ namespace godbot.Game
             KillPopulation = false;
         }
 
-        //public void RunYear()
-        //{
-        //    // roll die
-        //    int die = RollDie();
-        //    // CurrentPlayingTeam moves = die
-        //    // Player inputs settlement moves
-        //    // Player inputs missile moves
-        //    SwitchTeamTurn();
-        //    // CurrentPlayingTeam moves = 6 - die
-        //    // Player inputs settlement moves
-        //    // Player inputs missile moves
-        //    // Advance game
-        //    Advance();
-        //}
-
         public void Advance()
         {
+            RedTeam.PreviousPopulation = RedTeam.Population;
+            BlueTeam.PreviousPopulation = BlueTeam.Population;
+
             if (KillPopulation)
             {
                 RedTeam.Population = 0;
@@ -213,6 +201,10 @@ namespace godbot.Game
         public void GetNewSwapYear()
         {
             SwapYear = random.Next(10, 16) + Year;
+        }
+
+        public void StartKilingPopulation()
+        {
             KillPopulation = true;
         }
 
@@ -246,6 +238,42 @@ namespace godbot.Game
                 else
                 {
                     return "ERROR people";
+                }
+            }
+        }
+
+        public string GetTeamPopulationDifferenceString(Constants.Teams team)
+        {
+            int teamDifference = 0;
+            if (team == Constants.Teams.Red)
+            {
+                teamDifference = RedTeam.Population - RedTeam.PreviousPopulation;
+            }
+            else if (team == Constants.Teams.Blue)
+            {
+                teamDifference = BlueTeam.Population - BlueTeam.PreviousPopulation;
+            }
+
+            if (!KillPopulation)
+            {
+                if (teamDifference >= 0)
+                {
+                    return $"gained {teamDifference / Constants.PopulationMultiplier} points";
+                }
+                else
+                {
+                    return $"lost {teamDifference / Constants.PopulationMultiplier} points";
+                }
+            }
+            else
+            {
+                if (teamDifference >= 0)
+                {
+                    return $"gained {teamDifference} people";
+                }
+                else
+                {
+                    return $"lost {teamDifference} people";
                 }
             }
         }

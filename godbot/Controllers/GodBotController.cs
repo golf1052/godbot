@@ -140,7 +140,10 @@ namespace godbot.Controllers
         {
             foreach (var i in instructions)
             {
-                await HelperMethods.SendSms(i.Recipient, i.Text);
+                foreach (var recipient in i.Recipients)
+                {
+                    await HelperMethods.SendSms(recipient, i.Text);
+                }
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }
         }

@@ -9,7 +9,9 @@ namespace godbot.Game
     {
         public Constants.Teams TeamColor { get; private set; }
         public int Population { get; set; }
+        public int PreviousPopulation { get; set; }
         public string UserId { get; private set; }
+        public int Moves { get; set; }
 
         public Team(string userId, Constants.Teams teamColor)
         {

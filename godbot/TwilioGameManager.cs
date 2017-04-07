@@ -51,6 +51,25 @@ namespace godbot
             }
         }
 
+        protected override string OtherChannel
+        {
+            get
+            {
+                if (game.TeamTurn == Game.Constants.Teams.Red)
+                {
+                    return BluePlayerNumber;
+                }
+                else if (game.TeamTurn == Game.Constants.Teams.Blue)
+                {
+                    return RedPlayerNumber;
+                }
+                else
+                {
+                    return Secrets.DebugNumber;
+                }
+            }
+        }
+
         public TwilioGameManager(PhoneNumberResource redPlayerNumber, PhoneNumberResource bluePlayerNumber, bool debug = false)
         {
             game = null;
@@ -62,7 +81,6 @@ namespace godbot
             WaitingForDieResponse = true;
             PlayersHaveDie = false;
             currentDieRoll = 0;
-            currentPlayersMoves = 0;
             WaitingForDieRollResponse = false;
             WaitingForRoundResponse = false;
             partOfRound = HalfOfRound.FirstHalf;
