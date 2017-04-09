@@ -24,10 +24,10 @@ namespace godbot.Controllers
             TwilioClient.Init(Secrets.TwilioAccountSid, Secrets.TwilioAuthToken);
         }
 
-        private TwilioGameManager currentGame;
-        private bool currentlyAwaitingOtherPlayer;
-        private PhoneNumberResource requestingPlayer;
-        private PhoneNumberResource awaitingOtherPlayer;
+        private static TwilioGameManager currentGame;
+        private static bool currentlyAwaitingOtherPlayer;
+        private static PhoneNumberResource requestingPlayer;
+        private static PhoneNumberResource awaitingOtherPlayer;
 
         public static async Task StartClient()
         {
@@ -46,7 +46,7 @@ namespace godbot.Controllers
             string body = Request.Form["Body"].ToString().ToLower();
             if (currentGame != null)
             {
-                if (from != currentGame.RedPlayerNumber || from != currentGame.BluePlayerNumber)
+                if (from != currentGame.RedPlayerNumber && from != currentGame.BluePlayerNumber)
                 {
                     await HelperMethods.SendSms(from, "A game is already in progress");
                     return;
@@ -108,7 +108,7 @@ namespace godbot.Controllers
             }
             if (body.StartsWith("start game") && body.Length > 11)
             {
-                PhoneNumber potentialNumber = new PhoneNumber(body.Substring(10));
+                PhoneNumber potentialNumber = new PhoneNumber(body.Substring(11));
                 PhoneNumberResource otherResult = null;
                 try
                 {
@@ -138,11 +138,33 @@ namespace godbot.Controllers
 
         public async Task SendGameInstructions(List<GameInstruction> instructions)
         {
+            (string, int) firstNumSent = (null, 0);
+            (string, int) secondNumSent = (null, 0);
             foreach (var i in instructions)
             {
                 foreach (var recipient in i.Recipients)
                 {
-                    await HelperMethods.SendSms(recipient, i.Text);
+                    if (string.IsNullOrEmpty(firstNumSent.Item1))
+                    {
+                        firstNumSent = (recipient, 0);
+                    }
+                    else if (string.IsNullOrEmpty(secondNumSent.Item1))
+                    {
+                        if (firstNumSent.Item1 != recipient)
+                        {
+                            secondNumSent = (recipient, 0);
+                        }
+                    }
+                    if (recipient == firstNumSent.Item1)
+                    {
+                        firstNumSent.Item2++;
+                        await HelperMethods.SendSms(recipient, $"#{firstNumSent.Item2}: {i.Text}");
+                    }
+                    else if (recipient == secondNumSent.Item1)
+                    {
+                        secondNumSent.Item2++;
+                        await HelperMethods.SendSms(recipient, $"#{secondNumSent.Item2}: {i.Text}");
+                    }
                 }
                 await Task.Delay(TimeSpan.FromMilliseconds(1000));
             }

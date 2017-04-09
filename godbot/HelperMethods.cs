@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Twilio;
 using Twilio.Clients;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -12,7 +13,7 @@ namespace godbot
     {
         public static async Task SendSms(string to, string message)
         {
-            await SendSms(to, Secrets.TwilioPhoneNumber);
+            await SendSms(to, Secrets.TwilioPhoneNumber, message);
         }
 
         public static async Task SendSms(string to, string from, string message)

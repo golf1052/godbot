@@ -72,7 +72,7 @@ namespace godbot
 
         public TwilioGameManager(PhoneNumberResource redPlayerNumber, PhoneNumberResource bluePlayerNumber, bool debug = false)
         {
-            game = null;
+            game = new Game.Game(redPlayerNumber.PhoneNumber.ToString(), bluePlayerNumber.PhoneNumber.ToString());
             RedPlayerNumber = redPlayerNumber.PhoneNumber.ToString();
             RedPlayerDisplayNumber = redPlayerNumber.NationalFormat.ToString();
             BluePlayerNumber = bluePlayerNumber.PhoneNumber.ToString();
