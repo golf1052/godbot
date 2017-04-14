@@ -14,7 +14,7 @@ namespace godbot.Game
         public const int EnemyTerritoryEnemyPopulationPerTurn = 1000;
         public const int PopulationMultiplier = 1000;
         public const int MissileExplosionSize = 3;
-        public const int WinningScore = 5000 * PopulationMultiplier;
+        public const int WinningScore = 700 * PopulationMultiplier;
 
         public enum Teams
         {

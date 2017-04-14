@@ -8,12 +8,13 @@ namespace godbot.Game
     public class Game
     {
         public Board board;
-        private Random random;
+        public Random random;
         private List<Settlement> settlements;
         public Team RedTeam { get; private set; }
         public Team BlueTeam { get; private set; }
         public int Year { get; private set; }
         public bool ResolveSwap { get; set; }
+        public bool AlreadySwapped { get; set; }
         private int SwapYear { get; set; }
         public Constants.Teams TeamTurn { get; set; }
         public Team CurrentPlayingTeam
@@ -45,6 +46,7 @@ namespace godbot.Game
             BlueTeam = new Team(blueTeamUserId, Constants.Teams.Blue);
             Year = 0;
             ResolveSwap = false;
+            AlreadySwapped = false;
             SwapYear = 0;
             GetNewSwapYear();
             Year = 1;

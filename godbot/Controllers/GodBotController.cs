@@ -91,7 +91,9 @@ namespace godbot.Controllers
                     {
                         await HelperMethods.SendSms(requestingPlayer.PhoneNumber.ToString(), "Your request has been accepted. Starting game.");
                         currentGame = new TwilioGameManager(requestingPlayer, awaitingOtherPlayer);
-                        await HelperMethods.SendSms(currentGame.RedPlayerNumber, "Do you have a die that you can roll? (Answer yes or no)");
+                        currentGame.WaitingForDieResponse = false;
+                        currentGame.PlayersHaveDie = false;
+                        await SendGameInstructions(currentGame.StartYear());
                         ResetPlayers();
                     }
                     else

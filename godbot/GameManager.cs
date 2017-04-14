@@ -81,6 +81,15 @@ namespace godbot
             {
                 WaitingForDieRollResponse = false;
                 WaitingForRoundResponse = true;
+                if (game.Year == 1)
+                {
+                    var redTeamI = new GameInstruction($"You are the Red team.", OutputChannel);
+                    var blueTeamI = new GameInstruction($"You are the Blue team.", OtherChannel);
+                    instructions.Add(redTeamI);
+                    instructions.Add(blueTeamI);
+                    var scoreGoalI = new GameInstruction($"You are trying to reach a score of {Constants.WinningScore / Constants.PopulationMultiplier}.", BothChannels);
+                    instructions.Add(scoreGoalI);
+                }
                 var yearI = new GameInstruction($"It is year {game.Year}.", BothChannels);
                 instructions.Add(yearI);
                 currentDieRoll = number;
@@ -92,8 +101,8 @@ namespace godbot
                 }
                 else
                 {
-                    var playerI = new GameInstruction($"You have rolled a {currentDieRoll}. You can take {currentDieRoll} resources.", OutputChannel);
-                    var otherPlayerI = new GameInstruction($"The enemy has rolled a {currentDieRoll}. They can take {currentDieRoll} resources.", OtherChannel);
+                    var playerI = new GameInstruction($"You can take {currentDieRoll} resources.", OutputChannel);
+                    var otherPlayerI = new GameInstruction($"The enemy can take {currentDieRoll} resources.", OtherChannel);
                     instructions.Add(playerI);
                     instructions.Add(otherPlayerI);
                 }
@@ -269,6 +278,14 @@ namespace godbot
                         instructions.Add(enemyI);
                     }
                 }
+                else
+                {
+                    var noneDestroyedI = new GameInstruction($"You have destroyed 0 enemy settlements.", OutputChannel);
+                    int randWord = game.random.Next(0, 2);
+                    var enemyNoneDestroyedI = new GameInstruction($"The enemy has launched a missile {(randWord == 0 ? "strike" : "attack")} but did not hit any of your settlements.", OtherChannel);
+                    instructions.Add(noneDestroyedI);
+                    instructions.Add(enemyNoneDestroyedI);
+                }
                 game.RemoveDestroyedSettlements(destroyedSettlements);
             }
             instructions.AddRange(SwapHalf());
@@ -373,11 +390,17 @@ namespace godbot
             }
             if (game.ResolveSwap)
             {
-                var swapAnnoucement = new GameInstruction("PLEASE SWITCH SIDES. GET UP AND SWITCH. MOVE POSITIONS. GO GO GO.", BothChannels);
+                var swapAnnoucement = new GameInstruction("PLEASE SWITCH SIDES. MOVE POSITIONS. REMEMBER, G.O.D. IS ON YOUR SIDE.", BothChannels);
                 instructions.Add(swapAnnoucement);
-                var gameChangeAnnoucement = new GameInstruction("Points are now people. When you bomb a tile you kill all people living the affected settlements. This decreases population of each side accordingly.", BothChannels);
-                instructions.Add(gameChangeAnnoucement);
+                if (!game.AlreadySwapped)
+                {
+                    var gameChangeAnnouncement = new GameInstruction("Points are now people. When you bomb a tile you kill all people living the affected settlements.", BothChannels);
+                    instructions.Add(gameChangeAnnouncement);
+                    var newScoreAnnouncement = new GameInstruction($"You are now trying to reach a population of {Constants.WinningScore}.", BothChannels);
+                    instructions.Add(newScoreAnnouncement);
+                }
                 game.ResolveSwap = false;
+                game.AlreadySwapped = true;
                 game.StartKilingPopulation();
             }
             partOfRound = HalfOfRound.FirstHalf;
