@@ -45,15 +45,10 @@ namespace godbot
 
         public bool WaitingForRoundResponse { get; set; }
         public bool GameIsOver { get; protected set; }
-        public bool CanDraw
-        {
-            get
-            {
-                return game.CanDraw;
-            }
-        }
+        public bool CanDraw { get { return game.CanDraw; } }
         public bool RedHasDrawn { get; private set; }
         public bool BlueHasDrawn { get; private set; }
+        public int GameYear { get { return game.Year; } }
 
         public List<GameInstruction> StartYear()
         {

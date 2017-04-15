@@ -185,16 +185,16 @@ namespace godbot.Controllers
                     }
                     if (recipient == first.Number)
                     {
-                        await first.Append(i.Text);
+                        await first.Append(i.Text, currentGame.GameYear);
                     }
                     else if (recipient == second.Number)
                     {
-                        await second.Append(i.Text);
+                        await second.Append(i.Text, currentGame.GameYear);
                     }
                 }
             }
-            await first.Finish();
-            await second.Finish();
+            await first.Finish(currentGame.GameYear);
+            await second.Finish(currentGame.GameYear);
         }
     }
 
@@ -213,33 +213,33 @@ namespace godbot.Controllers
             currentlyBuildingMessage = new StringBuilder();
         }
 
-        public async Task Append(string message)
+        public async Task Append(string message, int currentYear)
         {
             string[] splitMessage = message.Split(' ');
             for (int i = 0; i < splitMessage.Length; i++)
             {
-                if ($"#{numberSent + 1}: ".Length + currentlyBuildingMessage.Length + splitMessage[i].Length + 1 <= MaxTextMessageSize)
+                if ($"#{currentYear}-{numberSent + 1}: ".Length + currentlyBuildingMessage.Length + splitMessage[i].Length + 1 <= MaxTextMessageSize)
                 {
                     currentlyBuildingMessage.Append($"{splitMessage[i]} ");
                 }
                 else
                 {
                     numberSent++;
-                    await HelperMethods.SendSms(Number, $"#{numberSent}: {currentlyBuildingMessage.ToString().Trim()}");
+                    await HelperMethods.SendSms(Number, $"#{currentYear}-{numberSent}: {currentlyBuildingMessage.ToString().Trim()}");
                     currentlyBuildingMessage.Clear();
                     currentlyBuildingMessage.Append($"{splitMessage[i]} ");
                 }
             }
         }
 
-        public async Task Finish()
+        public async Task Finish(int currentYear)
         {
             if (currentlyBuildingMessage.Length > 0)
             {
                 if (!string.IsNullOrEmpty(Number))
                 {
                     numberSent++;
-                    await HelperMethods.SendSms(Number, $"#{numberSent}: {currentlyBuildingMessage.ToString().Trim()}");
+                    await HelperMethods.SendSms(Number, $"#{currentYear}-{numberSent}: {currentlyBuildingMessage.ToString().Trim()}");
                 }
             }
         }
