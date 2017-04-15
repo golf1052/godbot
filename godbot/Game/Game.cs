@@ -36,6 +36,7 @@ namespace godbot.Game
             }
         }
         public bool KillPopulation { get; set; }
+        public bool CanDraw { get; private set; }
 
         public Game(string redTeamUserId, string blueTeamUserId)
         {
@@ -51,6 +52,7 @@ namespace godbot.Game
             GetNewSwapYear();
             Year = 1;
             KillPopulation = false;
+            CanDraw = false;
         }
 
         public void Advance()
@@ -97,6 +99,7 @@ namespace godbot.Game
             Year++;
             if (Year >= SwapYear)
             {
+                CanDraw = true;
                 ResolveSwap = true;
                 GetNewSwapYear();
             }
@@ -260,22 +263,22 @@ namespace godbot.Game
             {
                 if (teamDifference >= 0)
                 {
-                    return $"gained {teamDifference / Constants.PopulationMultiplier} points";
+                    return $"+{teamDifference / Constants.PopulationMultiplier} points";
                 }
                 else
                 {
-                    return $"lost {teamDifference / Constants.PopulationMultiplier} points";
+                    return $"-{teamDifference / Constants.PopulationMultiplier} points";
                 }
             }
             else
             {
                 if (teamDifference >= 0)
                 {
-                    return $"gained {teamDifference} people";
+                    return $"+{teamDifference} people";
                 }
                 else
                 {
-                    return $"lost {teamDifference} people";
+                    return $"-{teamDifference} people";
                 }
             }
         }

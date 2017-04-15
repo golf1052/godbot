@@ -12,7 +12,7 @@ namespace godbot
         public string BluePlayerDm { get; private set; }
         private string debugChannel;
         
-        protected override string OutputChannel
+        public override string OutputChannel
         {
             get
             {

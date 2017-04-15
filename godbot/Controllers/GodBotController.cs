@@ -11,6 +11,7 @@ using Twilio.Rest.Lookups.V1;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio;
 using System.Collections.Generic;
+using System.Text;
 
 namespace godbot.Controllers
 {
@@ -50,6 +51,31 @@ namespace godbot.Controllers
                 {
                     await HelperMethods.SendSms(from, "A game is already in progress");
                     return;
+                }
+                if (!currentGame.CanDraw)
+                {
+                    if (from != currentGame.OutputChannel)
+                    {
+                        await HelperMethods.SendSms(from, "It's not your turn yet.");
+                        return;
+                    }
+                }
+                else
+                {
+                    if (body.Trim() != "draw")
+                    {
+                        await HelperMethods.SendSms(from, "It's not your turn yet.");
+                        return;
+                    }
+                    else
+                    {
+                        await SendGameInstructions(currentGame.AttemptDraw(from));
+                        if (currentGame.GameIsOver)
+                        {
+                            currentGame = null;
+                        }
+                        return;
+                    }
                 }
                 if (currentGame.WaitingForDieResponse)
                 {
@@ -140,35 +166,81 @@ namespace godbot.Controllers
 
         public async Task SendGameInstructions(List<GameInstruction> instructions)
         {
-            (string, int) firstNumSent = (null, 0);
-            (string, int) secondNumSent = (null, 0);
+            SmsMessage first = new SmsMessage(0);
+            SmsMessage second = new SmsMessage(0);
             foreach (var i in instructions)
             {
                 foreach (var recipient in i.Recipients)
                 {
-                    if (string.IsNullOrEmpty(firstNumSent.Item1))
+                    if (string.IsNullOrEmpty(first.Number))
                     {
-                        firstNumSent = (recipient, 0);
+                        first.Number = recipient;
                     }
-                    else if (string.IsNullOrEmpty(secondNumSent.Item1))
+                    else if (string.IsNullOrEmpty(second.Number))
                     {
-                        if (firstNumSent.Item1 != recipient)
+                        if (first.Number != recipient)
                         {
-                            secondNumSent = (recipient, 0);
+                            second.Number = recipient;
                         }
                     }
-                    if (recipient == firstNumSent.Item1)
+                    if (recipient == first.Number)
                     {
-                        firstNumSent.Item2++;
-                        await HelperMethods.SendSms(recipient, $"#{firstNumSent.Item2}: {i.Text}");
+                        await first.Append(i.Text);
                     }
-                    else if (recipient == secondNumSent.Item1)
+                    else if (recipient == second.Number)
                     {
-                        secondNumSent.Item2++;
-                        await HelperMethods.SendSms(recipient, $"#{secondNumSent.Item2}: {i.Text}");
+                        await second.Append(i.Text);
                     }
                 }
-                await Task.Delay(TimeSpan.FromMilliseconds(1000));
+            }
+            await first.Finish();
+            await second.Finish();
+        }
+    }
+
+    class SmsMessage
+    {
+        public const int MaxTextMessageSize = 160;
+
+        public string Number { get; set; }
+        private int numberSent;
+        private StringBuilder currentlyBuildingMessage;
+
+        public SmsMessage(int number)
+        {
+            Number = null;
+            numberSent = number;
+            currentlyBuildingMessage = new StringBuilder();
+        }
+
+        public async Task Append(string message)
+        {
+            string[] splitMessage = message.Split(' ');
+            for (int i = 0; i < splitMessage.Length; i++)
+            {
+                if ($"#{numberSent + 1}: ".Length + currentlyBuildingMessage.Length + splitMessage[i].Length + 1 <= MaxTextMessageSize)
+                {
+                    currentlyBuildingMessage.Append($"{splitMessage[i]} ");
+                }
+                else
+                {
+                    numberSent++;
+                    await HelperMethods.SendSms(Number, $"#{numberSent}: {currentlyBuildingMessage.ToString().Trim()}");
+                    currentlyBuildingMessage.Clear();
+                    currentlyBuildingMessage.Append($"{splitMessage[i]} ");
+                }
+            }
+        }
+
+        public async Task Finish()
+        {
+            if (currentlyBuildingMessage.Length > 0)
+            {
+                if (!string.IsNullOrEmpty(Number))
+                {
+                    numberSent++;
+                    await HelperMethods.SendSms(Number, $"#{numberSent}: {currentlyBuildingMessage.ToString().Trim()}");
+                }
             }
         }
     }

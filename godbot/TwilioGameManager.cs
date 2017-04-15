@@ -32,7 +32,7 @@ namespace godbot
             }
         }
 
-        protected override string OutputChannel
+        public override string OutputChannel
         {
             get
             {

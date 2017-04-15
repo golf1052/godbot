@@ -26,7 +26,7 @@ namespace godbot
         protected SectionOfRound sectionOfRound;
 
         protected abstract string CurrentPlayerName { get; }
-        protected abstract string OutputChannel { get; }
+        public abstract string OutputChannel { get; }
         protected abstract string OtherChannel { get; }
         protected List<string> BothChannels
         {
@@ -45,6 +45,15 @@ namespace godbot
 
         public bool WaitingForRoundResponse { get; set; }
         public bool GameIsOver { get; protected set; }
+        public bool CanDraw
+        {
+            get
+            {
+                return game.CanDraw;
+            }
+        }
+        public bool RedHasDrawn { get; private set; }
+        public bool BlueHasDrawn { get; private set; }
 
         public List<GameInstruction> StartYear()
         {
@@ -121,7 +130,7 @@ namespace godbot
             }
             else
             {
-                var mainI = new GameInstruction($"Place your settlements and then input coordinates. Letter then number (ex. D4). Use spaces or commas to deliminate. Enter none for no settlements.", OutputChannel);
+                var mainI = new GameInstruction($"Input settlement coordinates. Enter none for no settlements.", OutputChannel);
                 instructions.Add(mainI);
             }
             return instructions;
@@ -191,7 +200,7 @@ namespace godbot
                 }
                 else
                 {
-                    var rocketsI = new GameInstruction($"You have {game.CurrentPlayingTeam.Moves} remaining. Play your missiles and then input coordinates. Letter then number (ex. D4). Use spaces or commas to deliminate. Enter none for no missiles.", OutputChannel);
+                    var rocketsI = new GameInstruction($"You have {game.CurrentPlayingTeam.Moves} remaining. Input missile coordinates. Enter none for no missiles.", OutputChannel);
                     instructions.Add(rocketsI);
                 }
                 sectionOfRound = SectionOfRound.Missiles;
@@ -263,8 +272,11 @@ namespace godbot
                             enemyDestroyedNum++;
                         }
                     }
-                    var teamI = new GameInstruction($"The following settlements for your side were destroyed:{teamDestroyed}. These settlements are lost.", OutputChannel);
-                    instructions.Add(teamI);
+                    if (string.IsNullOrEmpty(teamDestroyed))
+                    {
+                        var teamI = new GameInstruction($"Your destroyed settlements:{teamDestroyed}. These settlements are lost.", OutputChannel);
+                        instructions.Add(teamI);
+                    }
                     if (debug)
                     {
                         var enemyI = new GameInstruction($"The following settlements for the enemy side were destroyed:{enemyDestroyed}. These settlements are lost.", OutputChannel);
@@ -272,8 +284,8 @@ namespace godbot
                     }
                     else
                     {
-                        var numberDestroyedI = new GameInstruction($"You have destroyed {enemyDestroyedNum} enemy settlements. These settlements are lost.", OutputChannel);
-                        var enemyI = new GameInstruction($"Your following settlements were destroyed:{enemyDestroyed}. These settlements are lost.", OtherChannel);
+                        var numberDestroyedI = new GameInstruction($"You have destroyed {enemyDestroyedNum} enemy settlements.", OutputChannel);
+                        var enemyI = new GameInstruction($"Your destroyed settlements:{enemyDestroyed}. These settlements are lost.", OtherChannel);
                         instructions.Add(numberDestroyedI);
                         instructions.Add(enemyI);
                     }
@@ -300,7 +312,7 @@ namespace godbot
                 partOfRound = HalfOfRound.SecondHalf;
                 sectionOfRound = SectionOfRound.Settlements;
                 game.CurrentPlayingTeam.Moves = 0;
-                var switchI = new GameInstruction($"Switching turns...", BothChannels);
+                var switchI = new GameInstruction($"Switching turns", BothChannels);
                 instructions.Add(switchI);
                 game.SwitchTeamTurn();
                 game.CurrentPlayingTeam.Moves = 6 - currentDieRoll;
@@ -349,10 +361,8 @@ namespace godbot
             List<GameInstruction> instructions = new List<GameInstruction>();
             game.CurrentPlayingTeam.Moves = 0;
             game.Advance();
-            var pointAnnoucment = new GameInstruction($"The Red side has {game.GetTeamPopulationTotalString(Constants.Teams.Red)}. The Blue side has {game.GetTeamPopulationTotalString(Constants.Teams.Blue)}.", BothChannels);
+            var pointAnnoucment = new GameInstruction($"Red: {game.GetTeamPopulationTotalString(Constants.Teams.Red)} ({game.GetTeamPopulationDifferenceString(Constants.Teams.Red)}). Blue: {game.GetTeamPopulationTotalString(Constants.Teams.Blue)} ({game.GetTeamPopulationDifferenceString(Constants.Teams.Blue)}).", BothChannels);
             instructions.Add(pointAnnoucment);
-            var differenceAnnoucement = new GameInstruction($"The Red side has {game.GetTeamPopulationDifferenceString(Constants.Teams.Red)}. The Blue side has {game.GetTeamPopulationDifferenceString(Constants.Teams.Blue)}.", BothChannels);
-            instructions.Add(differenceAnnoucement);
             if (game.RedTeam.Population >= Constants.WinningScore &&
                 game.BlueTeam.Population >= Constants.WinningScore)
             {
@@ -398,14 +408,60 @@ namespace godbot
                     instructions.Add(gameChangeAnnouncement);
                     var newScoreAnnouncement = new GameInstruction($"You are now trying to reach a population of {Constants.WinningScore}.", BothChannels);
                     instructions.Add(newScoreAnnouncement);
+                    var drawI = new GameInstruction($"You can now initiate a draw by sending draw. Both sides must agree to draw on the same turn.", BothChannels);
+                    instructions.Add(drawI);
                 }
                 game.ResolveSwap = false;
                 game.AlreadySwapped = true;
                 game.StartKilingPopulation();
             }
+            instructions.AddRange(ResetDraw());
             partOfRound = HalfOfRound.FirstHalf;
             sectionOfRound = SectionOfRound.Settlements;
             instructions.AddRange(StartYear());
+            return instructions;
+        }
+
+        public List<GameInstruction> AttemptDraw(string from)
+        {
+            List<GameInstruction> instructions = new List<GameInstruction>();
+            if (from == game.RedTeam.UserId)
+            {
+                RedHasDrawn = true;
+            }
+            else if (from == game.BlueTeam.UserId)
+            {
+                BlueHasDrawn = true;
+            }
+            if (RedHasDrawn && BlueHasDrawn)
+            {
+                var drawGameI = new GameInstruction("Both players have agreed to a draw. The game has ended.", BothChannels);
+                instructions.Add(drawGameI);
+                GameIsOver = true;
+            }
+            else
+            {
+                var i = new GameInstruction("The other player also needs to agree to a draw.", from);
+                instructions.Add(i);
+            }
+            return instructions;
+        }
+
+        private List<GameInstruction> ResetDraw()
+        {
+            List<GameInstruction> instructions = new List<GameInstruction>();
+            if (RedHasDrawn)
+            {
+                var redI = new GameInstruction("Draw failed.", game.RedTeam.UserId);
+                instructions.Add(redI);
+            }
+            else if (BlueHasDrawn)
+            {
+                var blueI = new GameInstruction("Draw failed.", game.BlueTeam.UserId);
+                instructions.Add(blueI);
+            }
+            RedHasDrawn = false;
+            BlueHasDrawn = false;
             return instructions;
         }
     }
