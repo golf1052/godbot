@@ -100,13 +100,13 @@ namespace godbot
                 game.CurrentPlayingTeam.Moves = currentDieRoll;
                 if (debug)
                 {
-                    var i = new GameInstruction($"{CurrentPlayerName} rolls a {currentDieRoll}. They can take {currentDieRoll} resources.", OutputChannel);
+                    var i = new GameInstruction($"{CurrentPlayerName} rolls a {currentDieRoll}. They can take {currentDieRoll} {(currentDieRoll == 1 ? "resource" : "resources")}.", OutputChannel);
                     instructions.Add(i);
                 }
                 else
                 {
-                    var playerI = new GameInstruction($"You can take {currentDieRoll} resources.", OutputChannel);
-                    var otherPlayerI = new GameInstruction($"The enemy can take {currentDieRoll} resources.", OtherChannel);
+                    var playerI = new GameInstruction($"It is your turn. You can take {currentDieRoll} {(currentDieRoll == 1 ? "resource" : "resources")}.", OutputChannel);
+                    var otherPlayerI = new GameInstruction($"It is the enemy's turn. The enemy can take {currentDieRoll} {(currentDieRoll == 1 ? "resource" : "resources")}.", OtherChannel);
                     instructions.Add(playerI);
                     instructions.Add(otherPlayerI);
                 }
@@ -120,12 +120,12 @@ namespace godbot
             List<GameInstruction> instructions = new List<GameInstruction>();
             if (debug)
             {
-                var mainI = new GameInstruction($"{CurrentPlayerName} place your settlements and then input coordinates. Use spaces or commas to deliminate. Enter none for no settlements.", OutputChannel);
+                var mainI = new GameInstruction($"{CurrentPlayerName} place your settlements and then input coordinates. Use spaces or commas to separate entries. Enter none for no settlements.", OutputChannel);
                 instructions.Add(mainI);
             }
             else
             {
-                var mainI = new GameInstruction($"Input settlement coordinates. Enter none for no settlements.", OutputChannel);
+                var mainI = new GameInstruction($"Input settlement coordinates. Use spaces or commas to separate entries. Enter none for no settlements.", OutputChannel);
                 instructions.Add(mainI);
             }
             return instructions;
@@ -190,12 +190,12 @@ namespace godbot
             {
                 if (debug)
                 {
-                    var rocketsI = new GameInstruction($"{CurrentPlayerName}, you have {game.CurrentPlayingTeam.Moves} remaining. Play your missiles and then input coordinates. Use spaces or commas to deliminate. Enter none for no missiles.", OutputChannel);
+                    var rocketsI = new GameInstruction($"{CurrentPlayerName}, you have {game.CurrentPlayingTeam.Moves} remaining. Play your missiles and then input coordinates. Use spaces or commas to separate entries. Enter none for no missiles.", OutputChannel);
                     instructions.Add(rocketsI);
                 }
                 else
                 {
-                    var rocketsI = new GameInstruction($"You have {game.CurrentPlayingTeam.Moves} remaining. Input missile coordinates. Enter none for no missiles.", OutputChannel);
+                    var rocketsI = new GameInstruction($"You have {game.CurrentPlayingTeam.Moves} remaining. Input missile coordinates. Use spaces or commas to separate entries. Enter none for no missiles.", OutputChannel);
                     instructions.Add(rocketsI);
                 }
                 sectionOfRound = SectionOfRound.Missiles;
@@ -267,7 +267,7 @@ namespace godbot
                             enemyDestroyedNum++;
                         }
                     }
-                    if (string.IsNullOrEmpty(teamDestroyed))
+                    if (!string.IsNullOrEmpty(teamDestroyed))
                     {
                         var teamI = new GameInstruction($"Your destroyed settlements:{teamDestroyed}. These settlements are lost.", OutputChannel);
                         instructions.Add(teamI);
@@ -315,13 +315,13 @@ namespace godbot
                 {
                     if (debug)
                     {
-                        var i = new GameInstruction($"{CurrentPlayerName} can take {6 - currentDieRoll} resources.", OutputChannel);
+                        var i = new GameInstruction($"{CurrentPlayerName} can take {6 - currentDieRoll} {(6 - currentDieRoll == 1 ? "resource" : "resources")}.", OutputChannel);
                         instructions.Add(i);
                     }
                     else
                     {
-                        var playerI = new GameInstruction($"You can take {6 - currentDieRoll} resources.", OutputChannel);
-                        var otherPlayerI = new GameInstruction($"The enemy can take {6 - currentDieRoll} resources.", OtherChannel);
+                        var playerI = new GameInstruction($"It is your turn. You can take {6 - currentDieRoll} {(6 - currentDieRoll == 1 ? "resource" : "resources")}.", OutputChannel);
+                        var otherPlayerI = new GameInstruction($"It is the enemy's turn. The enemy can take {6 - currentDieRoll} {(6 - currentDieRoll == 1 ? "resource" : "resources")}.", OtherChannel);
                         instructions.Add(playerI);
                         instructions.Add(otherPlayerI);
                     }
@@ -395,7 +395,7 @@ namespace godbot
             }
             if (game.ResolveSwap)
             {
-                var swapAnnoucement = new GameInstruction("PLEASE SWITCH SIDES. MOVE POSITIONS. REMEMBER, G.O.D. IS ON YOUR SIDE.", BothChannels);
+                var swapAnnoucement = new GameInstruction("PLEASE SWITCH SIDES. YOU ARE NOW ON THE OTHER TEAM. MOVE POSITIONS. REMEMBER, G.O.D. IS ON YOUR SIDE.", BothChannels);
                 instructions.Add(swapAnnoucement);
                 if (!game.AlreadySwapped)
                 {
@@ -403,7 +403,7 @@ namespace godbot
                     instructions.Add(gameChangeAnnouncement);
                     var newScoreAnnouncement = new GameInstruction($"You are now trying to reach a population of {Constants.WinningScore}.", BothChannels);
                     instructions.Add(newScoreAnnouncement);
-                    var drawI = new GameInstruction($"You can now initiate a draw by sending draw. Both sides must agree to draw on the same turn.", BothChannels);
+                    var drawI = new GameInstruction($"You can now initiate a draw by sending draw. Both sides must agree to draw on the same turn. You can propose a draw every turn.", BothChannels);
                     instructions.Add(drawI);
                 }
                 game.ResolveSwap = false;
@@ -447,12 +447,12 @@ namespace godbot
             List<GameInstruction> instructions = new List<GameInstruction>();
             if (RedHasDrawn)
             {
-                var redI = new GameInstruction("Draw failed.", game.RedTeam.UserId);
+                var redI = new GameInstruction("Draw failed. You can try to draw again.", game.RedTeam.UserId);
                 instructions.Add(redI);
             }
             else if (BlueHasDrawn)
             {
-                var blueI = new GameInstruction("Draw failed.", game.BlueTeam.UserId);
+                var blueI = new GameInstruction("Draw failed. You can try to draw again.", game.BlueTeam.UserId);
                 instructions.Add(blueI);
             }
             RedHasDrawn = false;
