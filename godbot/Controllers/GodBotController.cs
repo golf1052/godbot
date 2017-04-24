@@ -40,6 +40,22 @@ namespace godbot.Controllers
             await client.Connect(new Uri((string)responseObject["url"]));
         }
 
+        [HttpGet]
+        [Route("ping")]
+        public JObject Ping()
+        {
+            JObject o = new JObject();
+            if (currentGame != null)
+            {
+                o["status"] = "current_game";
+            }
+            else
+            {
+                o["status"] = "no_game";
+            }
+            return o;
+        }
+
         [HttpPost]
         public async Task Index()
         {
