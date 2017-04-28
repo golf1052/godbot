@@ -10,6 +10,7 @@ namespace godbot.Game
         public Constants.Teams TeamColor { get; private set; }
         public int Population { get; set; }
         public int PreviousPopulation { get; set; }
+        public int BeforeSwapPopulation { get; set; }
         public string UserId { get; private set; }
         public int Moves { get; set; }
 
@@ -17,7 +18,10 @@ namespace godbot.Game
         {
             TeamColor = teamColor;
             Population = 0;
+            PreviousPopulation = 0;
+            BeforeSwapPopulation = 0;
             UserId = userId;
+            Moves = 0;
         }
     }
 }

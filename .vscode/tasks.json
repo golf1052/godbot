@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}\\godbot\\project.json"
+                "${workspaceRoot}\\godbot\\godbot.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"

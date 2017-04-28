@@ -62,8 +62,8 @@ namespace godbot.Game
 
             if (KillPopulation)
             {
-                RedTeam.Population = 0;
-                BlueTeam.Population = 0;
+                RedTeam.Population = RedTeam.BeforeSwapPopulation;
+                BlueTeam.Population = BlueTeam.BeforeSwapPopulation;
             }
 
             foreach (Settlement settlement in settlements)
@@ -210,7 +210,26 @@ namespace godbot.Game
 
         public void StartKilingPopulation()
         {
+            RedTeam.BeforeSwapPopulation = GetBeforeSwapPopulation(RedTeam);
+            BlueTeam.BeforeSwapPopulation = GetBeforeSwapPopulation(BlueTeam);
             KillPopulation = true;
+        }
+
+        private int GetBeforeSwapPopulation(Team team)
+        {
+            int realPopulation = 0;
+            foreach (var settlement in settlements)
+            {
+                if (settlement.OwningTeam == team.TeamColor)
+                {
+                    realPopulation += settlement.TeamPopulation;
+                }
+                else
+                {
+                    realPopulation += settlement.EnemyPopulation;
+                }
+            }
+            return team.Population - realPopulation;
         }
 
         public string GetTeamPopulationTotalString(Constants.Teams team)
