@@ -80,8 +80,11 @@ namespace godbot.Controllers
                 {
                     if (body.Trim() != "draw")
                     {
-                        await HelperMethods.SendSms(from, "It's not your turn yet.");
-                        return;
+                        if (from != currentGame.OutputChannel)
+                        {
+                            await HelperMethods.SendSms(from, "It's not your turn yet.");
+                            return;
+                        }
                     }
                     else
                     {
